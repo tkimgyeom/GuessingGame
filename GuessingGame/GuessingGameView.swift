@@ -3,7 +3,7 @@
 //  GuessingGame
 //
 //  WHAT THIS GAME DOES NOW
-//  The app picks a secret whole number from 1 to 100.
+//  The app picks a secret whole number from 1 to 100
 //  You choose a guess with the buttons and click Guess.
 //  The app tells you if your guess is right or not right,
 //  and it counts your guesses. When you find the number,
