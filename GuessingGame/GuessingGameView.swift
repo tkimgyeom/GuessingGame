@@ -1,9 +1,9 @@
-//
+
 //  GuessingGameView.swift
 //  GuessingGame
 //
 //  WHAT THIS GAME DOES NOW
-//  The app picks a secret whole number from 1 to 100
+//  The app picks a secret whole number from 1 to 100.
 //  You choose a guess with the buttons and click Guess.
 //  The app tells you if your guess is right or not right,
 //  and it counts your guesses. When you find the number,
@@ -30,8 +30,6 @@ struct GuessingGameView: View {
 
     // Each @State variable is something the game remembers.
     // When one of them changes, the screen updates by itself.
-
-    @State var medal: String = "No medal"
     @State var score: Int = 0
     
     @State var gamesWon: Int = 0
@@ -42,29 +40,30 @@ struct GuessingGameView: View {
     @State var guess: Int = (lowestNumber + highestNumber) / 2
 
     // How many guesses the player has made in this game.
-    @State var guessCount: Int = 0
-
+    @State var guessCount: Int = 7
+    
     // The message shown to the player, with a symbol and a colour to match it.
-    @State var message: String = "I'm thinking of a number from \(lowestNumber) to \(highestNumber)."
+    @State var message: String = "Password is from \(lowestNumber) to \(highestNumber)."
     @State var messageSymbol: String = "questionmark.circle.fill"
-    @State var messageColor: Color = Color.indigo
+    @State var messageColor: Color = Color.black
 
     // Becomes true when the player finds the secret number.
     @State var gameIsOver: Bool = false
 
     // MARK: - Computed properties
-
+    
+    
     var body: some View {
         VStack(spacing: 20) {
 
             // The title at the top of the screen.
             HStack {
-                Image(systemName: "sparkle.magnifyingglass")
-                Text("Guessing Game")
+                Image(systemName: "banknote")
+                Text("Rob a Bank!")
             }
-            .font(.largeTitle)
+            .font(.custom("banknote", size: 65))
             .bold()
-            .foregroundStyle(Color.indigo)
+            .foregroundStyle(Color.black)
             // Shrink the title a little if it does not fit on one line.
             .lineLimit(1)
             .minimumScaleFactor(0.5)
@@ -80,6 +79,8 @@ struct GuessingGameView: View {
                     .font(.title2)
                     .multilineTextAlignment(.center)
             }
+        
+            
             .padding()
             .frame(maxWidth: .infinity, minHeight: 180)
             .background(messageColor.opacity(0.15))
@@ -108,6 +109,21 @@ struct GuessingGameView: View {
                 Button("+10") {
                     raiseGuessByTen()
                 }
+                
+                // 숫자를 조정하는 버튼들이 들어있는 HStack 맨 끝에 추가하세요
+                Button(action: {
+                    askHackerHint()
+                }) {
+                    Label("Hint (-1)", systemImage: "laptopcomputer")
+                        .font(.caption) // 기존 버튼들과 세로 크기를 맞추기 위해 캡션 폰트 적용
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 10)
+                        .background(Color.black)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                }
+                .disabled(gameIsOver || guessCount < 2)
+                
             }
             .buttonStyle(.bordered)
             .font(.title3)
@@ -130,15 +146,15 @@ struct GuessingGameView: View {
                 .buttonStyle(.borderedProminent)
             }
             HStack {
-                Image(systemName: "dice.fill")
-                Text("Guesses so far: \(guessCount)")
+                Image(systemName: "heart.fill")
+                Text("Remaining chances: \(guessCount)")
             }
                     .font(.headline)
                     .foregroundStyle(Color.secondary)
             
             HStack {
                 Image(systemName: "trophy.fill")
-                Text("Win: \(gamesWon)")
+                Text("Success: \(gamesWon)")
             }
                     .font(.headline)
                     .foregroundStyle(Color.secondary)
@@ -148,46 +164,94 @@ struct GuessingGameView: View {
         .fontDesign(.rounded)
         .controlSize(.large)
         // TRY: Change indigo to another colour, such as teal, pink or orange.
-        .tint(Color.indigo)
+        .tint(Color.black)
         // How big the game's window is on the Mac. It can be made taller or wider.
         .frame(minWidth: 420, minHeight: 640)
     }
 
     // MARK: - Functions
     
-    // Checks the player's guess against the secret number.
+    // 비밀번호 제출 함수 (기회 1회 소비)
+    // ① 비밀번호 제출 함수 (기회 1개 차감)
     func checkGuess() {
- 
-        // One more guess has been made.
-        guessCount += 1
- 
+        // 기회가 없거나 게임이 끝났으면 실행 차단
+        if gameIsOver || guessCount <= 0 { return }
+        
+        guessCount -= 1
+        
+        // 승리 / 실패 / 힌트 판정
         if guess == secretNumber {
-            message = "Yes, \(secretNumber) is my number."
-            messageSymbol = "star.circle.fill"
-            messageColor = Color.green
             gameIsOver = true
             gamesWon += 1
+            message = "The vault is open! Grab the cash and run!"
+            messageSymbol = "lock.open.fill"
+            messageColor = .green
+        } else if guessCount <= 0 {
+            guessCount = 0 // 마이너스 방지: 0으로 딱 멈춤!
+            gameIsOver = true
+            message = "Out of tries! The police arrived and arrested you! (Code was: \(secretNumber))"
+            messageSymbol = "light.beacon.max.fill"
+            messageColor = .red
+        } else if guess < secretNumber {
+            message = "Partner: 'No!, It's Higher' (\(guessCount) chances left)"
+            messageSymbol = "arrow.up.circle.fill"
+            messageColor = .orange
         } else {
-            if guess < secretNumber {
-                message = "\(guess) is too low. Go higher."
-                messageSymbol = "arrow.up.circle.fill"
-                messageColor = Color.blue
-            } else {
-                message = "\(guess) is too high. Go lower."
-                messageSymbol = "arrow.down.circle.fill"
-                messageColor = Color.red
-            }
+            message = "Partner: 'No, It's Lower' (\(guessCount) chances left)"
+            messageSymbol = "arrow.down.circle.fill"
+            messageColor = .blue
         }
-            if score >= 80 {
-                medal = "Gold"
-            } else if score >= 65 {
-                medal = "Silver"
-            } else if score >= 50 {
-                medal = "Bronze"
-            } else {
-                medal = "No medal"
-            }
     }
+
+    // ② 해커 힌트 함수 (기회 2개 차감)
+    func askHackerHint() {
+        // 기회가 없거나 게임이 끝났으면 실행 차단
+        if gameIsOver || guessCount <= 0 { return }
+        
+        // 기회 2개 차감
+        guessCount -= 1
+        
+        // 힌트 쓰다가 0 이하가 된 경우
+        if guessCount <= 0 {
+            guessCount = 0 // 마이너스 방지: 0으로 딱 멈춤!
+            gameIsOver = true
+            message = "We lost too much time checking the hint! The police arrived!"
+            messageSymbol = "light.beacon.max.fill"
+            messageColor = .red
+        } else {
+            if secretNumber % 2 == 0 {
+                message = "Hacker: 'We lost some time! The passwod is [EVEN]! (\(guessCount) tries left)'"
+            } else {
+                message = "Hacker: 'We lost some time! The password is [ODD]! (\(guessCount) tries left)'"
+            }
+            messageSymbol = "laptopcomputer"
+            messageColor = .purple
+        }
+    }
+
+    // ③ 다시 시작 함수 (기회 8개로 원상복구)
+    func startNewGame() {
+        secretNumber = Int.random(in: lowestNumber...highestNumber)
+        guess = (lowestNumber + highestNumber) / 2
+        guessCount = 8 // 다시 8개로 리셋!
+        gameIsOver = false
+        message = "Password is from \(lowestNumber) to \(highestNumber)."
+        messageSymbol = "questionmark.circle.fill"
+        messageColor = .black
+    }
+    // Changes the guess by the amount given, but keeps it inside the range.
+    // A negative amount makes the guess smaller.
+    func changeGuess(by amount: Int) {
+        guess += amount
+        if guess < lowestNumber {
+            guess = lowestNumber
+        }
+        if guess > highestNumber {
+            guess = highestNumber
+        }
+    }
+    
+    // Checks the player's guess against the secret number.
 
     // Makes the guess 10 smaller, but never smaller than the lowest number.
     func lowerGuessByTen() {
@@ -222,15 +286,6 @@ struct GuessingGameView: View {
     }
 
     // Picks a new secret number and resets everything else.
-    func startNewGame() {
-        secretNumber = Int.random(in: lowestNumber...highestNumber)
-        guess = (lowestNumber + highestNumber) / 2
-        guessCount = 0
-        message = "I'm thinking of a new number from \(lowestNumber) to \(highestNumber)."
-        messageSymbol = "questionmark.circle.fill"
-        messageColor = Color.indigo
-        gameIsOver = false
-    }
 }
 
 #Preview {
