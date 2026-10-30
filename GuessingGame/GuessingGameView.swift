@@ -187,9 +187,20 @@ struct GuessingGameView: View {
         if guess == secretNumber {
             gameIsOver = true
             gamesWon += 1
-            message = "The vault is open! Grab the cash and run!"
-            messageSymbol = "lock.open.fill"
-            messageColor = .green
+            if guessCount >= 5 {
+                message = "You had so much time to steal, you are SO RICH NOW!"
+                messageSymbol = "lock.open.fill"
+                messageColor = .green
+            } else if guessCount >= 1 {
+                message = "The vault is open! Grab the cash and run!"
+                messageSymbol = "lock.open.fill"
+                messageColor = .green
+            } else if guessCount == 0 {
+                message = "You found password in last chance!"
+                messageSymbol = "lock.open.fill"
+                messageColor = .green
+            }
+            
         } else if guessCount <= 0 {
             guessCount = 0
             gameIsOver = true
